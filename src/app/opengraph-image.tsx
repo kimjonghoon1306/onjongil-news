@@ -23,8 +23,15 @@ export default function OGImage() {
             ONJONGIL NEWS
           </div>
         </div>
-        <div style={{ fontSize: 96, fontWeight: 900, letterSpacing: -4, lineHeight: 1.05 }}>
-          온종일뉴스
+        <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
+          <div style={{
+            width: 116, height: 116, display: "flex", alignItems: "center", justifyContent: "center",
+            border: "6px solid #ff5a6e", borderRadius: 22, color: "#ff5a6e",
+            fontSize: 78, fontWeight: 900,
+          }}>溫</div>
+          <div style={{ fontSize: 96, fontWeight: 900, letterSpacing: -4, lineHeight: 1.05 }}>
+            온종일뉴스
+          </div>
         </div>
         <div style={{ fontSize: 42, fontWeight: 700, marginTop: 24, color: "#f1f5f9" }}>
           사장님을 위한 진짜 실용 뉴스

@@ -30,8 +30,12 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
       }}>
         {/* 상단: 로고 + 카테고리 */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 12, height: 12, borderRadius: 999, background: "#ff2d78" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{
+              width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center",
+              border: "3px solid #c8102e", borderRadius: 10, color: "#c8102e",
+              fontSize: 34, fontWeight: 900,
+            }}>溫</div>
             <div style={{ fontSize: 34, fontWeight: 900, color: "#0b2545", letterSpacing: -1 }}>온종일뉴스</div>
           </div>
           <div style={{
