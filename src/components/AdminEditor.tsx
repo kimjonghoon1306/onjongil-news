@@ -45,6 +45,7 @@ export default function AdminEditor() {
   const [geminiKey, setGeminiKey] = useState("");
   const [groqKey, setGroqKey] = useState("");
   const [showKeys, setShowKeys] = useState(false);
+  const [keyMsg, setKeyMsg] = useState("");
 
   useEffect(() => {
     try {
@@ -58,7 +59,8 @@ export default function AdminEditor() {
   const saveKeys = () => {
     localStorage.setItem("on_ai_gemini", geminiKey.trim());
     localStorage.setItem("on_ai_groq", groqKey.trim());
-    flash("AI 키를 저장했어요. 이제 이 키로 초안을 생성해요.");
+    setKeyMsg("✓ 저장되었습니다");
+    setTimeout(() => setKeyMsg(""), 3000);
   };
 
   const set = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) =>
@@ -171,7 +173,10 @@ export default function AdminEditor() {
               <input type="checkbox" checked={showKeys}
                 onChange={(e) => setShowKeys(e.target.checked)} /> 키 보기
             </label>
-            <button className="btn btn-primary" onClick={saveKeys}>키 저장</button>
+            <div className="ai-keys-save">
+              {keyMsg && <span className="ai-keys-msg">{keyMsg}</span>}
+              <button className="btn btn-primary" onClick={saveKeys}>키 저장</button>
+            </div>
           </div>
           <p className="hint">
             제미나이가 우선, 사용량이 다 차면 자동으로 다음 모델·Groq로 넘어가요.

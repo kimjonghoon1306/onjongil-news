@@ -344,6 +344,8 @@ svg { display: block; }
 .ai-keys-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .show-keys { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; color: var(--text-dim); cursor: pointer; }
 .show-keys input { width: 17px; height: 17px; accent-color: var(--accent); }
+.ai-keys-save { display: inline-flex; align-items: center; gap: 12px; }
+.ai-keys-msg { font-size: 14px; font-weight: 800; color: #16a34a; }
 @media (max-width: 640px) { .ai-keys-hint { display: none; } }
 
 /* ---------- 관리자 로그인 ---------- */
