@@ -149,7 +149,18 @@ svg { display: block; }
 .ad-imgbg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: blur(26px) brightness(.55); transform: scale(1.2); }
 .ad-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .ad-overlay { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 18px 32px; background: linear-gradient(to top, rgba(0,0,0,.6), transparent 65%); }
-.ad-badge { position: absolute; top: 12px; left: 16px; z-index: 2; font-size: 11px; font-weight: 800; letter-spacing: .5px; background: rgba(0,0,0,.42); padding: 4px 10px; border-radius: 5px; }
+.ad-badge { position: absolute; top: 12px; left: 16px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: .5px; background: rgba(0,0,0,.42); padding: 4px 10px 4px 9px; border-radius: 5px; }
+/* AD 앞 핑크 점 + 깜빡임 */
+.ad-badge::before, .ad-badge-inline::before {
+  content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: #ff2d78; box-shadow: 0 0 0 0 rgba(255,45,120,.7);
+  animation: ad-blink 1.1s ease-in-out infinite; flex-shrink: 0;
+}
+@keyframes ad-blink {
+  0%   { opacity: 1;   box-shadow: 0 0 0 0 rgba(255,45,120,.7); }
+  50%  { opacity: .35; box-shadow: 0 0 0 5px rgba(255,45,120,0); }
+  100% { opacity: 1;   box-shadow: 0 0 0 0 rgba(255,45,120,0); }
+}
 .ad-text { position: relative; z-index: 1; }
 .ad-text h3 { font-size: 22px; font-weight: 900; letter-spacing: -.5px; }
 .ad-text p { font-size: 14.5px; opacity: .95; margin-top: 4px; }
@@ -242,7 +253,7 @@ svg { display: block; }
 
 .article-ad { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 34px 0 12px; padding: 22px 26px; border-radius: var(--radius); color: #fff; box-shadow: var(--shadow); position: relative; transition: transform .2s, box-shadow .2s; }
 .article-ad:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-.article-ad .ad-badge-inline { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .5px; background: rgba(0,0,0,.28); padding: 4px 10px; border-radius: 5px; margin-bottom: 10px; }
+.article-ad .ad-badge-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: .5px; background: rgba(0,0,0,.28); padding: 4px 10px 4px 9px; border-radius: 5px; margin-bottom: 10px; }
 .back-link { display: inline-block; margin: 22px 0 10px; font-weight: 700; font-size: 16px; color: var(--accent); transition: opacity .2s; }
 .back-link:hover { opacity: .7; }
 
@@ -532,6 +543,39 @@ svg { display: block; }
   .utilbar, .masthead, .gnb, .footer, .art-tools, .article-ad, .ad-slider, .back-link, .section { display: none !important; }
   .article { max-width: 100%; }
 }
+
+/* ============ 전역 인터랙션 (모든 페이지·관리자 포함) ============ */
+/* 1) 모든 버튼: 부드러운 전환 + hover 당겨짐 + active 눌림 */
+.btn, button, .swatch, .tpl-card, .preview-tab, .insert-bar button,
+.saved-item button, .fs-control button, .pw-toggle, .ad-cta {
+  transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, background .15s ease, border-color .15s ease, color .15s ease, filter .15s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0) scale(.96); }
+
+/* 2) 핵심 CTA(발행하기) 은은한 펄스 */
+.btn-publish { animation: cta-pulse 2.2s ease-in-out infinite; }
+.btn-publish:hover { animation: none; }
+@keyframes cta-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+  50%      { box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 0%, transparent); }
+}
+
+/* 3) 카드/클릭 요소: hover 시 당겨지고 테두리 색 + 그림자 */
+.card:hover { transform: translateY(-6px) scale(1.012); border-color: var(--accent); box-shadow: var(--shadow-lg); }
+.hl-item:hover { transform: translateX(5px); }
+.ds-item:hover { transform: translateY(-2px); }
+.contact-card { transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .2s, border-color .2s; }
+.contact-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: var(--shadow-lg); }
+.tpl-card:hover { transform: translateY(-3px) scale(1.02); border-color: var(--accent); box-shadow: var(--shadow-lg); }
+.saved-item { transition: transform .16s cubic-bezier(.34,1.56,.64,1), border-color .18s, box-shadow .2s; }
+.saved-item:hover { transform: translateX(4px); border-color: var(--accent); box-shadow: var(--shadow); }
+.admin-section { transition: border-color .2s, box-shadow .2s, transform .18s; }
+.admin-section:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); box-shadow: var(--shadow-lg); }
+.swatch:hover { transform: scale(1.14) rotate(-4deg); }
+
+/* 4) 헤드라인 썸네일·기사 카드 이미지 살짝 확대 */
+.card:hover .card-img { filter: saturate(1.08); }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
