@@ -216,6 +216,16 @@ svg { display: block; }
 .article-hero-img { width: 100%; aspect-ratio: 16 / 9; border-radius: var(--radius); box-shadow: var(--shadow); }
 .article-hero figcaption { margin-top: 8px; font-size: 13px; color: var(--text-dim); text-align: right; }
 
+/* 상세 신뢰 헤더 바 + 템플릿 본문 */
+.article-topbar { max-width: 760px; margin: 34px auto 20px; padding-bottom: 16px; border-bottom: 3px solid var(--line-strong); }
+.article-topbar .article-cat { margin-bottom: 14px; }
+.article-topbar .byline { margin-top: 4px; }
+.tpl-article { max-width: 760px; margin: 0 auto; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+.tpl-article img { max-width: 100%; }
+.article .article-provenance,
+.article .article-ad,
+.article .back-link { max-width: 760px; margin-left: auto; margin-right: auto; }
+
 /* 본문 — 글자크기 배율(--read-scale) 적용 */
 .article-body { font-family: "Noto Serif KR", serif; font-size: calc(19.5px * var(--read-scale)); line-height: 1.95; color: var(--text); }
 .article-body p { margin: 1.2rem 0; }
@@ -336,6 +346,11 @@ svg { display: block; }
 .btn-ai:disabled { opacity: .6; cursor: default; }
 .btn-ghost { background: var(--soft); color: var(--text); border: 1.5px solid var(--line); }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-publish { min-width: 150px; background: var(--accent); color: #fff; box-shadow: var(--shadow); }
+.btn-publish:hover { box-shadow: var(--shadow-lg); filter: brightness(1.05); }
+.btn-publish:disabled { opacity: .6; cursor: default; }
+.check-row { display: flex; align-items: center; gap: 10px; font-size: 15.5px; font-weight: 600; color: var(--text); cursor: pointer; padding: 4px 0; }
+.check-row input { width: 20px; height: 20px; accent-color: var(--accent); flex-shrink: 0; }
 
 /* 하단 고정 액션바 */
 .admin-actions { position: sticky; bottom: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 4px 0 0; padding: 14px 20px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(12px); box-shadow: 0 -6px 22px rgba(16,24,40,.1); }

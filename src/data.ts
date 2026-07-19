@@ -43,6 +43,7 @@ export interface Article {
   title: string;
   excerpt: string;
   image: string;      // 썸네일 (그라디언트 placeholder)
+  imageUrl?: string;  // 대표 이미지(사진 URL, 있으면 우선)
   reporter: string;   // REPORTERS 키
   publishedAt: string; // ISO 발행일시
   updatedAt?: string;  // ISO 수정일시(있으면 '수정' 표기)

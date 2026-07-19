@@ -1,20 +1,24 @@
-import { ARTICLES, CATEGORIES } from "@/data";
+import { CATEGORIES } from "@/data";
+import { getArticles } from "@/lib/articles";
 import { TopStory, HeadlineList, DeadlineStrip, Section } from "@/components/news";
 import AdSlider from "@/components/AdSlider";
 
-export default function Home() {
-  const featured = ARTICLES.find((a) => a.featured)!;
-  const headlines = ARTICLES.filter((a) => !a.featured).slice(0, 4);
+export const revalidate = 30; // 발행 후 최대 30초 내 반영
+
+export default async function Home() {
+  const articles = await getArticles();
+  const featured = articles.find((a) => a.featured) ?? articles[0];
+  const headlines = articles.filter((a) => a.id !== featured?.id).slice(0, 4);
 
   return (
     <main className="wrap home">
       <div className="hero">
-        <TopStory a={featured} />
+        {featured && <TopStory a={featured} />}
         <HeadlineList items={headlines} />
       </div>
       <DeadlineStrip />
       <AdSlider />
-      {CATEGORIES.map((c) => <Section key={c.id} id={c.id} />)}
+      {CATEGORIES.map((c) => <Section key={c.id} id={c.id} articles={articles} />)}
     </main>
   );
 }

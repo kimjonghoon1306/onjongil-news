@@ -42,6 +42,8 @@ export default function AdminEditor() {
   const [list, setList] = useState<Draft[]>([]);
   const [msg, setMsg] = useState<{ t: string; ok: boolean } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [featured, setFeatured] = useState(false);
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
 
   const [geminiKey, setGeminiKey] = useState("");
@@ -108,6 +110,31 @@ export default function AdminEditor() {
   const logout = async () => {
     await fetch("/api/admin-logout", { method: "POST" });
     window.location.href = "/";
+  };
+
+  const publish = async () => {
+    if (!d.title.trim()) return flash("제목을 입력해 주세요.", false);
+    if (!d.body.trim()) return flash("본문을 입력해 주세요.", false);
+    if (!confirm("이 기사를 사이트에 발행할까요? 대문에 바로 올라갑니다.")) return;
+    setPublishing(true);
+    try {
+      const res = await fetch("/api/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: d.title, category: d.category, excerpt: d.excerpt, body: d.body,
+          reporter: d.reporter, image: d.image, imageUrl: d.imageUrl,
+          template: d.template, source: d.source, aiAssisted: d.aiAssisted, featured,
+        }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || "발행 실패");
+      flash("✅ 발행됐어요! 잠시 후 대문에서 확인하세요.");
+    } catch (e) {
+      flash(e instanceof Error ? e.message : "발행에 실패했어요.", false);
+    } finally {
+      setPublishing(false);
+    }
   };
 
   const genAI = async () => {
@@ -204,6 +231,10 @@ export default function AdminEditor() {
                 <label>요약 (한 줄 소개)</label>
                 <input value={d.excerpt} onChange={(e) => set("excerpt", e.target.value)} placeholder="목록·검색·공유에 쓰이는 짧은 소개" />
               </div>
+              <label className="check-row">
+                <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} />
+                이 기사를 <b>오늘의 톱기사</b>로 올리기
+              </label>
             </div>
           </section>
 
@@ -332,7 +363,10 @@ POST1: 관련 글 제목|한 줄 설명
               {msg && <span className={"admin-inline-msg " + (msg.ok ? "ok" : "err")}>{msg.t}</span>}
             </div>
             <div className="admin-actions-primary">
-              <button className="btn btn-primary" onClick={save}>{editId ? "임시저장 (수정)" : "임시저장"}</button>
+              <button className="btn btn-ghost" onClick={save}>{editId ? "임시저장 (수정)" : "임시저장"}</button>
+              <button className="btn btn-publish" onClick={publish} disabled={publishing}>
+                {publishing ? "발행 중…" : "🚀 발행하기"}
+              </button>
             </div>
           </div>
         </div>

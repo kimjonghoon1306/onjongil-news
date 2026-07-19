@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  CATEGORIES, ARTICLES, DEADLINES, REPORTERS, catOf,
+  DEADLINES, REPORTERS, catOf,
   type Article, type CategoryId,
 } from "@/data";
 import { fmtRel } from "@/lib/format";
@@ -8,12 +8,18 @@ import { CategoryIcon, ChevronRight } from "@/icons";
 
 const reporterName = (a: Article) => REPORTERS[a.reporter]?.name ?? "온종일뉴스";
 
+// 대표 이미지: 사진(imageUrl)이 있으면 사진, 없으면 색상 배너
+const imgStyle = (a: Article): React.CSSProperties =>
+  a.imageUrl
+    ? { backgroundImage: `url(${a.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center" }
+    : { background: a.image };
+
 /* ===== 톱기사 ===== */
 export function TopStory({ a }: { a: Article }) {
   const cat = catOf(a.category);
   return (
     <Link href={`/article/${a.id}`} className="topstory">
-      <div className="topstory-img" style={{ background: a.image }} />
+      <div className="topstory-img" style={imgStyle(a)} />
       <div className="topstory-body">
         <span className="topstory-badge" style={{ background: cat.color }}>{cat.name}</span>
         <h2>{a.title}</h2>
@@ -34,7 +40,7 @@ export function HeadlineList({ items }: { items: Article[] }) {
         return (
           <Link href={`/article/${a.id}`} className="hl-item" key={a.id}>
             <span className="hl-num" style={{ color: cat.color }}>{i + 1}</span>
-            <div className="hl-thumb" style={{ background: a.image }} />
+            <div className="hl-thumb" style={imgStyle(a)} />
             <div className="hl-text">
               <span className="hl-cat" style={{ color: cat.color }}>{cat.name}</span>
               <p>{a.title}</p>
@@ -74,7 +80,7 @@ export function Card({ a }: { a: Article }) {
   const cat = catOf(a.category);
   return (
     <Link href={`/article/${a.id}`} className="card">
-      <div className="card-img" style={{ background: a.image }}>
+      <div className="card-img" style={imgStyle(a)}>
         <span className="card-cat" style={{ background: cat.color }}>{cat.name}</span>
       </div>
       <div className="card-body">
@@ -90,9 +96,9 @@ export function Card({ a }: { a: Article }) {
 }
 
 /* ===== 카테고리 섹션 ===== */
-export function Section({ id }: { id: CategoryId }) {
+export function Section({ id, articles }: { id: CategoryId; articles: Article[] }) {
   const cat = catOf(id);
-  const items = ARTICLES.filter((a) => a.category === id && !a.featured).slice(0, 4);
+  const items = articles.filter((a) => a.category === id && !a.featured).slice(0, 4);
   if (items.length === 0) return null;
   return (
     <section className="section" id={id}>
@@ -113,5 +119,3 @@ export function Section({ id }: { id: CategoryId }) {
     </section>
   );
 }
-
-export { CATEGORIES };
