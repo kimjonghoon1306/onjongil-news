@@ -9,7 +9,7 @@ const DESC =
   "정치는 뺀다. 사장님·창업자·소상공인에게 진짜 도움 되는 실용정보만. AI·프랜차이즈·정부지원금·마케팅·컨설팅·무료 툴.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://news.onjongil.com"),
+  metadataBase: new URL("https://news.xn--zk5biyyw.com"),
   title: {
     default: `${SITE} — 사장님을 위한 실용 뉴스`,
     template: `%s · ${SITE}`,
