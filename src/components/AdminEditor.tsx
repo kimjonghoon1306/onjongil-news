@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { CATEGORIES, REPORTERS, catOf, type CategoryId } from "@/data";
 import { TEMPLATES, buildTemplateHtml } from "@/lib/templates";
+import { readMinutes } from "@/lib/format";
 
 const STORE_KEY = "on_news_drafts";
 
@@ -45,6 +47,18 @@ export default function AdminEditor() {
   const [publishing, setPublishing] = useState(false);
   const [featured, setFeatured] = useState(false);
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
+  const [fullPreview, setFullPreview] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  // 전체화면 미리보기 시 배경 스크롤 잠금 + ESC 닫기
+  useEffect(() => {
+    if (!fullPreview) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFullPreview(false); };
+    window.addEventListener("keydown", onKey);
+    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
+  }, [fullPreview]);
 
   const [geminiKey, setGeminiKey] = useState("");
   const [groqKey, setGroqKey] = useState("");
@@ -81,6 +95,8 @@ export default function AdminEditor() {
   };
 
   const cat = catOf(d.category);
+  const reporter = REPORTERS[d.reporter];
+  const readMin = readMinutes(d.body || d.excerpt);
   const tpl = TEMPLATES.find((t) => t.id === d.template);
   const previewHtml = useMemo(
     () => buildTemplateHtml(d.template, d.title || "제목을 입력하세요", d.body || d.excerpt || "", d.imageUrl),
@@ -375,12 +391,17 @@ POST1: 관련 글 제목|한 줄 설명
         <div className="admin-col-preview">
           <div className="preview-panel">
             <div className="preview-toolbar">
-              <span className="preview-ttl">기사 미리보기 · {tpl?.name}</span>
-              <div className="preview-tabs" role="tablist">
-                <button className={"preview-tab" + (previewMode === "desktop" ? " on" : "")}
-                  onClick={() => setPreviewMode("desktop")}>데스크톱</button>
-                <button className={"preview-tab" + (previewMode === "mobile" ? " on" : "")}
-                  onClick={() => setPreviewMode("mobile")}>모바일</button>
+              <span className="preview-ttl">미리보기 · {tpl?.name}</span>
+              <div className="preview-toolbar-right">
+                <div className="preview-tabs" role="tablist">
+                  <button className={"preview-tab" + (previewMode === "desktop" ? " on" : "")}
+                    onClick={() => setPreviewMode("desktop")}>데스크톱</button>
+                  <button className={"preview-tab" + (previewMode === "mobile" ? " on" : "")}
+                    onClick={() => setPreviewMode("mobile")}>모바일</button>
+                </div>
+                <button className="btn btn-ghost btn-sm" onClick={() => setFullPreview(true)}>
+                  ⛶ 전체화면
+                </button>
               </div>
             </div>
             <div className="preview-stage">
@@ -393,6 +414,44 @@ POST1: 관련 글 제목|한 줄 설명
           </div>
         </div>
       </div>
+
+      {/* 전체화면 미리보기 (대중이 보는 화면) */}
+      {mounted && fullPreview && createPortal(
+        <div className="fullprev-overlay" onClick={() => setFullPreview(false)}>
+          <div className="fullprev-bar" onClick={(e) => e.stopPropagation()}>
+            <span className="fullprev-title">대중이 보는 화면 · 미리보기</span>
+            <div className="fullprev-bar-right">
+              <div className="preview-tabs">
+                <button className={"preview-tab" + (previewMode === "desktop" ? " on" : "")}
+                  onClick={() => setPreviewMode("desktop")}>데스크톱</button>
+                <button className={"preview-tab" + (previewMode === "mobile" ? " on" : "")}
+                  onClick={() => setPreviewMode("mobile")}>모바일</button>
+              </div>
+              <button className="fullprev-close" onClick={() => setFullPreview(false)} aria-label="닫기">✕ 닫기</button>
+            </div>
+          </div>
+          <div className="fullprev-stage" onClick={() => setFullPreview(false)}>
+            <div className={"fullprev-device fullprev-device--" + previewMode} onClick={(e) => e.stopPropagation()}>
+              {/* 사이트 상단 흉내 */}
+              <div className="fullprev-mast">
+                <span className="fullprev-logo">온종일뉴스</span>
+                <span className="fullprev-cat" style={{ color: cat.color }}>{cat.name}</span>
+              </div>
+              {/* 신뢰 헤더 */}
+              <div className="fullprev-trust">
+                <span className="byline-avatar" style={{ background: cat.color }}>{(reporter?.name ?? "온")[0]}</span>
+                <div>
+                  <div className="fullprev-reporter">{reporter?.name}</div>
+                  <div className="fullprev-meta">방금 전 · 읽는 데 약 {readMin}분</div>
+                </div>
+              </div>
+              {/* 템플릿 본문 */}
+              <div className="tpl-preview" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </main>
   );
 }
