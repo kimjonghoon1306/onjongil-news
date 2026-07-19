@@ -7,21 +7,21 @@ import { CATEGORIES, REPORTERS, catOf, type CategoryId } from "@/data";
 import { TEMPLATES, buildTemplateHtml } from "@/lib/templates";
 import { readMinutes } from "@/lib/format";
 
-const STORE_KEY = "on_news_drafts";
-
-interface Draft {
-  id: string;
+// Supabase 초안 row (어느 기기에서든 이어쓰기)
+interface DraftRow {
+  slug: string;
   title: string;
   category: CategoryId;
-  reporter: string;
+  reporter_id: string;
   excerpt: string;
   body: string;
-  source: string;
-  aiAssisted: boolean;
+  source: string | null;
+  ai_assisted: boolean;
   image: string;
-  imageUrl: string;
+  image_url: string | null;
   template: string;
-  savedAt: number;
+  featured: boolean;
+  updated_at: string;
 }
 
 const grad = (a: string, b: string) => `linear-gradient(135deg, ${a}, ${b})`;
@@ -32,18 +32,19 @@ const SWATCHES = [
   grad("#334155", "#0f172a"),
 ];
 
-const blank = (): Omit<Draft, "id" | "savedAt"> => ({
-  title: "", category: "fund", reporter: "desk", excerpt: "",
+const blank = () => ({
+  title: "", category: "fund" as CategoryId, reporter: "desk", excerpt: "",
   body: "", source: "", aiAssisted: false,
   image: SWATCHES[0], imageUrl: "", template: "magazine",
 });
 
 export default function AdminEditor() {
   const [d, setD] = useState(blank());
-  const [editId, setEditId] = useState<string | null>(null);
-  const [list, setList] = useState<Draft[]>([]);
+  const [editSlug, setEditSlug] = useState<string | null>(null); // 편집 중인 초안 slug
+  const [list, setList] = useState<DraftRow[]>([]);
   const [msg, setMsg] = useState<{ t: string; ok: boolean } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [featured, setFeatured] = useState(false);
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
@@ -65,13 +66,18 @@ export default function AdminEditor() {
   const [showKeys, setShowKeys] = useState(false);
   const [keyMsg, setKeyMsg] = useState("");
 
-  useEffect(() => {
+  const loadDrafts = async () => {
     try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (raw) setList(JSON.parse(raw));
-      setGeminiKey(localStorage.getItem("on_ai_gemini") || "");
-      setGroqKey(localStorage.getItem("on_ai_groq") || "");
+      const res = await fetch("/api/drafts");
+      const j = await res.json();
+      if (res.ok) setList(j.drafts ?? []);
     } catch { /* noop */ }
+  };
+
+  useEffect(() => {
+    loadDrafts();
+    setGeminiKey(localStorage.getItem("on_ai_gemini") || "");
+    setGroqKey(localStorage.getItem("on_ai_groq") || "");
   }, []);
 
   const saveKeys = () => {
@@ -89,11 +95,6 @@ export default function AdminEditor() {
     setTimeout(() => setMsg(null), 3000);
   };
 
-  const persist = (next: Draft[]) => {
-    setList(next);
-    localStorage.setItem(STORE_KEY, JSON.stringify(next));
-  };
-
   const cat = catOf(d.category);
   const reporter = REPORTERS[d.reporter];
   const readMin = readMinutes(d.body || d.excerpt);
@@ -103,24 +104,71 @@ export default function AdminEditor() {
     [d.template, d.title, d.body, d.excerpt, d.imageUrl]
   );
 
-  const save = () => {
+  const save = async () => {
     if (!d.title.trim()) return flash("제목을 입력해 주세요.", false);
-    if (editId) {
-      persist(list.map((x) => (x.id === editId ? { ...x, ...d, savedAt: Date.now() } : x)));
-      flash("수정 내용을 임시저장했어요.");
-    } else {
-      const item: Draft = { ...d, id: "d" + Date.now(), savedAt: Date.now() };
-      persist([item, ...list]);
-      setEditId(item.id);
-      flash("임시저장했어요. (브라우저에 보관 · 발행은 다음 단계)");
+    setSaving(true);
+    try {
+      const res = await fetch("/api/drafts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug: editSlug ?? undefined,
+          title: d.title, category: d.category, excerpt: d.excerpt, body: d.body,
+          reporter: d.reporter, image: d.image, imageUrl: d.imageUrl,
+          template: d.template, source: d.source, aiAssisted: d.aiAssisted, featured,
+        }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || "저장 실패");
+      setEditSlug(j.slug);
+      await loadDrafts();
+      flash("임시저장했어요. 어느 기기에서든 이어쓸 수 있어요.");
+    } catch (e) {
+      flash(e instanceof Error ? e.message : "저장에 실패했어요.", false);
+    } finally {
+      setSaving(false);
     }
   };
 
-  const newDraft = () => { setD(blank()); setEditId(null); flash("새 기사를 시작했어요."); };
-  const edit = (x: Draft) => { setD({ ...blank(), ...x }); setEditId(x.id); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  const remove = (id: string) => {
-    persist(list.filter((x) => x.id !== id));
-    if (editId === id) newDraft();
+  // 본문 끝에 예시 블록 삽입 (형식 실수 방지)
+  const appendBlock = (block: string) => {
+    setD((p) => ({ ...p, body: (p.body.trimEnd() + "\n\n" + block).trimStart() }));
+    flash("본문 맨 아래에 넣었어요. 내용만 바꾸면 돼요.");
+  };
+  const BLOCK_REF = `[참고자료시작]
+LINK1: 중소벤처기업부|공식 공고|https://www.mss.go.kr
+LINK2: 소상공인시장진흥공단|지원사업 안내|https://www.semas.or.kr
+[참고자료끝]`;
+  const BLOCK_FAQ = `[FAQ시작]
+Q1: 누가 신청할 수 있나요?
+A1: 여기에 답을 적어주세요.
+Q2: 언제까지 신청하나요?
+A2: 여기에 답을 적어주세요.
+[FAQ끝]`;
+  const BLOCK_RELATED = `[관련글시작]
+POST1: 관련 글 제목 1|한 줄 설명
+POST2: 관련 글 제목 2|한 줄 설명
+[관련글끝]`;
+
+  const newDraft = () => { setD(blank()); setEditSlug(null); setFeatured(false); flash("새 기사를 시작했어요."); };
+  const edit = (x: DraftRow) => {
+    setD({
+      title: x.title, category: x.category, reporter: x.reporter_id || "desk",
+      excerpt: x.excerpt || "", body: x.body || "", source: x.source || "",
+      aiAssisted: !!x.ai_assisted, image: x.image || SWATCHES[0],
+      imageUrl: x.image_url || "", template: x.template || "magazine",
+    });
+    setEditSlug(x.slug);
+    setFeatured(!!x.featured);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const remove = async (slug: string) => {
+    if (!confirm("이 임시저장 글을 삭제할까요?")) return;
+    try {
+      await fetch(`/api/drafts?slug=${encodeURIComponent(slug)}`, { method: "DELETE" });
+      await loadDrafts();
+      if (editSlug === slug) newDraft();
+    } catch { flash("삭제에 실패했어요.", false); }
   };
 
   const logout = async () => {
@@ -138,6 +186,7 @@ export default function AdminEditor() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          slug: editSlug ?? undefined,
           title: d.title, category: d.category, excerpt: d.excerpt, body: d.body,
           reporter: d.reporter, image: d.image, imageUrl: d.imageUrl,
           template: d.template, source: d.source, aiAssisted: d.aiAssisted, featured,
@@ -145,6 +194,8 @@ export default function AdminEditor() {
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "발행 실패");
+      setEditSlug(null);
+      await loadDrafts();
       flash("✅ 발행됐어요! 잠시 후 대문에서 확인하세요.");
     } catch (e) {
       flash(e instanceof Error ? e.message : "발행에 실패했어요.", false);
@@ -310,23 +361,22 @@ export default function AdminEditor() {
                 </div>
                 <textarea value={d.body} onChange={(e) => set("body", e.target.value)}
                   placeholder={"본문을 입력하세요.\n\n## 소제목 예시\n[팁] 도움 되는 팁을 여기에"} />
+                {/* 원클릭 삽입 (형식 실수 방지) */}
+                <div className="insert-bar">
+                  <span className="insert-label">눌러서 넣기:</span>
+                  <button type="button" onClick={() => appendBlock("## 소제목")}>＋ 소제목</button>
+                  <button type="button" onClick={() => appendBlock("[팁] 도움 되는 팁을 여기에")}>＋ 팁 상자</button>
+                  <button type="button" onClick={() => appendBlock("[주의] 주의할 점을 여기에")}>＋ 주의 상자</button>
+                  <button type="button" onClick={() => appendBlock(BLOCK_REF)}>＋ 참고자료·링크</button>
+                  <button type="button" onClick={() => appendBlock(BLOCK_FAQ)}>＋ 자주 묻는 질문</button>
+                  <button type="button" onClick={() => appendBlock(BLOCK_RELATED)}>＋ 관련 글</button>
+                </div>
                 <details className="editor-help">
                   <summary>본문 문법 도움말</summary>
                   <div className="editor-help-body">
                     <p><b>## 소제목</b> — 소제목(목차 자동 생성) · <b>[팁] [주의] [중요]</b> — 강조 상자</p>
-                    <p>참고링크·FAQ·관련글은 아래처럼 넣으면 템플릿에 맞게 정리돼요(선택):</p>
-                    <pre>{`[참고자료시작]
-LINK1: 중소벤처기업부|공식 공고|https://www.mss.go.kr
-[참고자료끝]
-
-[FAQ시작]
-Q1: 궁금한 점은?
-A1: 이렇게 답해요.
-[FAQ끝]
-
-[관련글시작]
-POST1: 관련 글 제목|한 줄 설명
-[관련글끝]`}</pre>
+                    <p>위 <b>‘눌러서 넣기’</b> 버튼을 누르면 본문 맨 아래에 예시가 자동으로 들어가요. 내용만 바꾸면 참고자료·FAQ·관련 글이 템플릿에 맞게 예쁘게 정리됩니다.</p>
+                    <p className="hint">※ 참고자료는 <code>LINK1: 이름|설명|주소</code> 형식이어야 링크로 바뀝니다.</p>
                   </div>
                 </details>
               </div>
@@ -351,6 +401,7 @@ POST1: 관련 글 제목|한 줄 설명
           <section className="admin-section">
             <div className="admin-section-head">
               <h2 className="admin-section-title">임시저장한 기사 <span className="count-badge">{list.length}</span></h2>
+              <p className="admin-section-desc">어느 기기에서든 이어서 쓸 수 있어요. (아직 대중에게는 안 보임)</p>
             </div>
             {list.length === 0
               ? <p className="hint">아직 저장한 기사가 없어요.</p>
@@ -359,12 +410,12 @@ POST1: 관련 글 제목|한 줄 설명
                   {list.map((x) => {
                     const c = catOf(x.category);
                     return (
-                      <div className="saved-item" key={x.id}>
+                      <div className="saved-item" key={x.slug}>
                         <span className="si-cat" style={{ background: c.color }}>{c.name}</span>
                         <span className="si-title">{x.title || "(제목 없음)"}</span>
-                        <span className="si-date">{new Date(x.savedAt).toLocaleDateString("ko-KR")}</span>
+                        <span className="si-date">{new Date(x.updated_at).toLocaleDateString("ko-KR")}</span>
                         <button onClick={() => edit(x)}>수정</button>
-                        <button onClick={() => remove(x.id)}>삭제</button>
+                        <button onClick={() => remove(x.slug)}>삭제</button>
                       </div>
                     );
                   })}
@@ -379,7 +430,9 @@ POST1: 관련 글 제목|한 줄 설명
               {msg && <span className={"admin-inline-msg " + (msg.ok ? "ok" : "err")}>{msg.t}</span>}
             </div>
             <div className="admin-actions-primary">
-              <button className="btn btn-ghost" onClick={save}>{editId ? "임시저장 (수정)" : "임시저장"}</button>
+              <button className="btn btn-ghost" onClick={save} disabled={saving}>
+                {saving ? "저장 중…" : editSlug ? "임시저장 (수정)" : "임시저장"}
+              </button>
               <button className="btn btn-publish" onClick={publish} disabled={publishing}>
                 {publishing ? "발행 중…" : "🚀 발행하기"}
               </button>

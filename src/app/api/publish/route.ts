@@ -47,8 +47,8 @@ export async function POST(req: Request) {
     published_at: now,
   };
 
-  // 4) 저장
-  const { error } = await sb.from("articles").insert(row).select("slug").single();
+  // 4) 저장 (초안이면 발행으로 승격, 아니면 신규)
+  const { error } = await sb.from("articles").upsert(row, { onConflict: "slug" }).select("slug").single();
   if (error) {
     return Response.json({ error: "발행 실패: " + error.message }, { status: 500 });
   }

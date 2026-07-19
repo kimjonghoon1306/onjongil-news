@@ -323,8 +323,16 @@ svg { display: block; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .field-label-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 
+/* 본문 원클릭 삽입 바 */
+.insert-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 4px; }
+.insert-label { font-size: 13px; font-weight: 800; color: var(--text-dim); margin-right: 2px; }
+.insert-bar button { font-size: 13.5px; font-weight: 700; color: var(--text); background: var(--soft); border: 1.5px solid var(--line); padding: 7px 12px; border-radius: 999px; transition: border-color .15s, color .15s, transform .1s; }
+.insert-bar button:hover { border-color: var(--accent); color: var(--accent); }
+.insert-bar button:active { transform: scale(.94); }
+.editor-help-body code { background: var(--soft); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; font-size: 12.5px; }
+
 /* 본문 도움말 */
-.editor-help { margin-top: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); }
+.editor-help { margin-top: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); }
 .editor-help > summary { cursor: pointer; list-style: none; padding: 10px 14px; font-size: 13.5px; font-weight: 800; color: var(--text-dim); }
 .editor-help > summary::-webkit-details-marker { display: none; }
 .editor-help-body { padding: 0 14px 14px; font-size: 13.5px; color: var(--text-dim); line-height: 1.6; }
