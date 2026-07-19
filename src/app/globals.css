@@ -232,6 +232,7 @@ svg { display: block; }
 
 .article-ad { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 34px 0 12px; padding: 22px 26px; border-radius: var(--radius); color: #fff; box-shadow: var(--shadow); position: relative; transition: transform .2s, box-shadow .2s; }
 .article-ad:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.article-ad .ad-badge-inline { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .5px; background: rgba(0,0,0,.28); padding: 4px 10px; border-radius: 5px; margin-bottom: 10px; }
 .back-link { display: inline-block; margin: 22px 0 10px; font-weight: 700; font-size: 16px; color: var(--accent); transition: opacity .2s; }
 .back-link:hover { opacity: .7; }
 

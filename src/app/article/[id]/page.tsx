@@ -145,8 +145,8 @@ export default async function ArticlePage(
           rel="noreferrer"
           style={{ background: ad.bg }}
         >
-          <span className="ad-badge">{ad.house ? "AD · 자사서비스" : "AD · 광고"}</span>
           <div className="ad-text">
+            <span className="ad-badge-inline">{ad.house ? "AD · 자사서비스" : "AD · 광고"}</span>
             <h3>{ad.title}</h3>
             <p>{ad.sub}</p>
           </div>
