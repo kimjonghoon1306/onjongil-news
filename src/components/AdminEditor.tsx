@@ -44,6 +44,8 @@ export default function AdminEditor() {
   const [list, setList] = useState<DraftRow[]>([]);
   const [msg, setMsg] = useState<{ t: string; ok: boolean } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [proofing, setProofing] = useState(false);
+  const [prevBody, setPrevBody] = useState<string | null>(null); // 교정 전 본문(되돌리기)
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [featured, setFeatured] = useState(false);
@@ -143,6 +145,34 @@ export default function AdminEditor() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // 맞춤법·띄어쓰기 교정
+  const proofread = async () => {
+    if (!d.body.trim()) return flash("먼저 본문을 입력해 주세요.", false);
+    setProofing(true);
+    try {
+      const res = await fetch("/api/proofread", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: d.body }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || "교정 실패");
+      setPrevBody(d.body);              // 되돌리기용 원문 보관
+      setD((p) => ({ ...p, body: j.body }));
+      flash("✅ 맞춤법·띄어쓰기를 교정했어요. 마음에 안 들면 되돌리기.");
+    } catch (e) {
+      flash(e instanceof Error ? e.message : "교정에 실패했어요.", false);
+    } finally {
+      setProofing(false);
+    }
+  };
+  const undoProofread = () => {
+    if (prevBody === null) return;
+    setD((p) => ({ ...p, body: prevBody }));
+    setPrevBody(null);
+    flash("교정 전 본문으로 되돌렸어요.");
   };
 
   // 본문 끝에 예시 블록 삽입 (형식 실수 방지)
@@ -370,9 +400,19 @@ POST2: 관련 글 제목 2|한 줄 설명
               <div className="field">
                 <div className="field-label-row">
                   <label>본문</label>
-                  <button type="button" className="btn btn-ai btn-sm" onClick={genAI} disabled={aiLoading}>
-                    {aiLoading ? "AI 작성 중…" : "✦ AI 초안"}
-                  </button>
+                  <div className="field-label-btns">
+                    {prevBody !== null && (
+                      <button type="button" className="btn btn-ghost btn-sm" onClick={undoProofread}>
+                        ↩ 교정 되돌리기
+                      </button>
+                    )}
+                    <button type="button" className="btn btn-fix btn-sm" onClick={proofread} disabled={proofing}>
+                      {proofing ? "교정 중…" : "✓ 맞춤법 교정"}
+                    </button>
+                    <button type="button" className="btn btn-ai btn-sm" onClick={genAI} disabled={aiLoading}>
+                      {aiLoading ? "AI 작성 중…" : "✦ AI 초안"}
+                    </button>
+                  </div>
                 </div>
                 <textarea value={d.body} onChange={(e) => set("body", e.target.value)}
                   placeholder={"본문을 입력하세요.\n\n## 소제목 예시\n[팁] 도움 되는 팁을 여기에"} />

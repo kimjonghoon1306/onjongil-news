@@ -321,7 +321,11 @@ svg { display: block; }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
 .field--title input { min-height: 58px; font-size: 20px; font-weight: 800; border-width: 2px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.field-label-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.field-label-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.field-label-btns { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.btn-fix { background: #0369a1; color: #fff; }
+.btn-fix:hover { filter: brightness(1.1); }
+.btn-fix:disabled { opacity: .6; cursor: default; }
 
 /* 본문 원클릭 삽입 바 */
 .insert-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 4px; }
