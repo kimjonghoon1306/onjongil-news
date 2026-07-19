@@ -55,24 +55,27 @@ function isQuota(status: number, msg: string) {
 }
 
 export async function POST(req: Request) {
-  const geminiKey = process.env.GEMINI_API_KEY;
-  const groqKey = process.env.GROQ_API_KEY;
-  if (!geminiKey && !groqKey) {
-    return Response.json(
-      { error: "AI 키가 아직 없어요. GEMINI_API_KEY 또는 GROQ_API_KEY를 설정해 주세요." },
-      { status: 503 }
-    );
-  }
-
-  let title = "", category = "";
+  let title = "", category = "", bodyGemini = "", bodyGroq = "";
   try {
     const b = await req.json();
     title = (b.title || "").toString().slice(0, 200);
     category = (b.category || "").toString().slice(0, 40);
+    bodyGemini = (b.geminiKey || "").toString().trim();
+    bodyGroq = (b.groqKey || "").toString().trim();
   } catch {
     return Response.json({ error: "요청 형식이 올바르지 않아요." }, { status: 400 });
   }
   if (!title.trim()) return Response.json({ error: "제목이 필요해요." }, { status: 400 });
+
+  // 관리자 페이지에서 입력한 키가 있으면 그걸 우선 사용, 없으면 서버 환경변수
+  const geminiKey = bodyGemini || process.env.GEMINI_API_KEY;
+  const groqKey = bodyGroq || process.env.GROQ_API_KEY;
+  if (!geminiKey && !groqKey) {
+    return Response.json(
+      { error: "AI 키가 없어요. 관리자 페이지의 'AI 키 설정'에 제미나이 또는 Groq 키를 넣어 주세요." },
+      { status: 503 }
+    );
+  }
 
   const prompt = `${GUIDE}\n\n카테고리: ${category}\n제목: ${title}\n\n위 제목으로 온종일뉴스 기사 초안을 JSON으로 작성해 주세요.`;
   let lastError: string | null = null;
