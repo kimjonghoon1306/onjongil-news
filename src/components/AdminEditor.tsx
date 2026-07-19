@@ -74,17 +74,32 @@ export default function AdminEditor() {
     } catch { /* noop */ }
   };
 
+  const loadKeys = async () => {
+    try {
+      const res = await fetch("/api/settings");
+      const j = await res.json();
+      if (res.ok) { setGeminiKey(j.geminiKey || ""); setGroqKey(j.groqKey || ""); }
+    } catch { /* noop */ }
+  };
+
   useEffect(() => {
     loadDrafts();
-    setGeminiKey(localStorage.getItem("on_ai_gemini") || "");
-    setGroqKey(localStorage.getItem("on_ai_groq") || "");
+    loadKeys();
   }, []);
 
-  const saveKeys = () => {
-    localStorage.setItem("on_ai_gemini", geminiKey.trim());
-    localStorage.setItem("on_ai_groq", groqKey.trim());
-    setKeyMsg("✓ 저장되었습니다");
-    setTimeout(() => setKeyMsg(""), 3000);
+  const saveKeys = async () => {
+    try {
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ geminiKey: geminiKey.trim(), groqKey: groqKey.trim() }),
+      });
+      if (!res.ok) throw new Error();
+      setKeyMsg("✓ 저장되었습니다 (모든 기기 공유)");
+    } catch {
+      setKeyMsg("저장 실패 — 다시 시도해 주세요");
+    }
+    setTimeout(() => setKeyMsg(""), 3500);
   };
 
   const set = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) =>
@@ -238,7 +253,7 @@ POST2: 관련 글 제목 2|한 줄 설명
       <details className="ai-keys">
         <summary>
           <span>⚙ AI 키 설정</span>
-          <span className="ai-keys-hint">무료 사용량이 끝나면 여기서 새 키로 교체하세요</span>
+          <span className="ai-keys-hint">모든 기기 공유 · 무료 사용량이 끝나면 여기서 새 키로 교체</span>
           <span className={"ai-keys-state " + (geminiKey || groqKey ? "on" : "off")}>
             {geminiKey || groqKey ? "키 등록됨" : "키 없음"}
           </span>

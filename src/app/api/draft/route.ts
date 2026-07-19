@@ -6,6 +6,8 @@
 // → 한 곳 토큰이 떨어져도 꼬이지 않고 다음으로 넘어감.
 // 초안은 반드시 사람이 사실 확인·검증 후 발행(윤리강령).
 
+import { getStoredKeys } from "@/lib/supabase";
+
 export const runtime = "nodejs";
 
 const GEMINI_MODELS = [
@@ -67,9 +69,10 @@ export async function POST(req: Request) {
   }
   if (!title.trim()) return Response.json({ error: "제목이 필요해요." }, { status: 400 });
 
-  // 관리자 페이지에서 입력한 키가 있으면 그걸 우선 사용, 없으면 서버 환경변수
-  const geminiKey = bodyGemini || process.env.GEMINI_API_KEY;
-  const groqKey = bodyGroq || process.env.GROQ_API_KEY;
+  // 키 우선순위: 요청 본문 → Supabase 저장(모든 기기 공유) → 환경변수
+  const stored = await getStoredKeys();
+  const geminiKey = bodyGemini || stored.gemini || process.env.GEMINI_API_KEY;
+  const groqKey = bodyGroq || stored.groq || process.env.GROQ_API_KEY;
   if (!geminiKey && !groqKey) {
     return Response.json(
       { error: "AI 키가 없어요. 관리자 페이지의 'AI 키 설정'에 제미나이 또는 Groq 키를 넣어 주세요." },

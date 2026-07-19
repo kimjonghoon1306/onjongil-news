@@ -29,3 +29,17 @@ export function serviceClient() {
     return null;
   }
 }
+
+// 서버에 저장된 AI 키 조회 (모든 기기 공유용)
+export async function getStoredKeys(): Promise<{ gemini: string; groq: string }> {
+  const sb = serviceClient();
+  if (!sb) return { gemini: "", groq: "" };
+  try {
+    const { data } = await sb.from("app_settings").select("key,value").in("key", ["gemini_key", "groq_key"]);
+    const m: Record<string, string> = {};
+    for (const r of data ?? []) m[r.key] = r.value ?? "";
+    return { gemini: m.gemini_key ?? "", groq: m.groq_key ?? "" };
+  } catch {
+    return { gemini: "", groq: "" };
+  }
+}
