@@ -48,6 +48,7 @@ export default function AdminEditor() {
   const [prevBody, setPrevBody] = useState<string | null>(null); // 교정 전 본문(되돌리기)
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [lastPublished, setLastPublished] = useState<string | null>(null);
   const [featured, setFeatured] = useState(false);
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [fullPreview, setFullPreview] = useState(false);
@@ -240,8 +241,9 @@ POST2: 관련 글 제목 2|한 줄 설명
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "발행 실패");
       setEditSlug(null);
+      setLastPublished(j.slug || null);
       await loadDrafts();
-      flash("✅ 발행됐어요! 잠시 후 대문에서 확인하세요.");
+      flash("✅ 발행됐어요! 아래 '방금 발행한 기사 보기'로 확인하세요.");
     } catch (e) {
       flash(e instanceof Error ? e.message : "발행에 실패했어요.", false);
     } finally {
@@ -274,7 +276,7 @@ POST2: 관련 글 제목 2|한 줄 설명
       <div className="admin-top">
         <h1><span className="admin-badge">관리자</span> 기사 작성</h1>
         <div className="admin-top-btns">
-          <Link className="btn btn-ghost" href="/">← 대문 보기</Link>
+          <a className="btn btn-ghost" href="/" target="_blank" rel="noreferrer">📄 기사 보러가기</a>
           <button className="btn btn-ghost" onClick={logout}>로그아웃</button>
         </div>
       </div>
@@ -477,6 +479,16 @@ POST2: 관련 글 제목 2|한 줄 설명
                 </div>
               )}
           </section>
+
+          {/* 발행 직후 안내 */}
+          {lastPublished && (
+            <div className="publish-done">
+              <span>✅ 발행 완료! 대중에게 공개됐어요.</span>
+              <a className="btn btn-primary btn-sm" href={`/article/${lastPublished}`} target="_blank" rel="noreferrer">
+                방금 발행한 기사 보기 →
+              </a>
+            </div>
+          )}
 
           {/* 하단 고정 액션바 */}
           <div className="admin-actions">

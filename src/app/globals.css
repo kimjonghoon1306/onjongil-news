@@ -363,6 +363,8 @@ svg { display: block; }
 .btn-publish:disabled { opacity: .6; cursor: default; }
 .check-row { display: flex; align-items: center; gap: 10px; font-size: 15.5px; font-weight: 600; color: var(--text); cursor: pointer; padding: 4px 0; }
 .check-row input { width: 20px; height: 20px; accent-color: var(--accent); flex-shrink: 0; }
+.publish-done { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 18px; border-radius: 12px; background: #f0faf4; border: 1.5px solid #16a34a; font-size: 15px; font-weight: 800; color: #15803d; }
+[data-theme="dark"] .publish-done { background: rgba(22,163,74,.15); }
 
 /* 하단 고정 액션바 */
 .admin-actions { position: sticky; bottom: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 4px 0 0; padding: 14px 20px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(12px); box-shadow: 0 -6px 22px rgba(16,24,40,.1); }
