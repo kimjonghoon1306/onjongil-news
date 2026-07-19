@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import ImageField from "@/components/ImageField";
 
 interface AdRow {
   id?: string;
@@ -104,11 +105,12 @@ export default function AdsManager() {
                   <input value={d.url} onChange={(e) => set("url", e.target.value)} placeholder="https://..." />
                 </div>
               </div>
-              <div className="field">
-                <label>배너 이미지 주소 (선택)</label>
-                <span className="hint">사진 URL을 넣으면 이미지 배너로 나와요(안 잘리게 표시). 비우면 아래 색상 배너.</span>
-                <input value={d.img} onChange={(e) => set("img", e.target.value)} placeholder="https://...jpg" />
-              </div>
+              <ImageField
+                label="배너 이미지 (선택)"
+                hint="사진을 올리면 이미지 배너로 나와요(안 잘리게 표시). 비우면 아래 색상 배너."
+                value={d.img}
+                onChange={(url) => set("img", url)}
+              />
               <div className="field">
                 <label>배너 색상 <span className="hint">· 이미지가 없을 때</span></label>
                 <div className="swatches">

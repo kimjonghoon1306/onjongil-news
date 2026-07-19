@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CATEGORIES, REPORTERS, catOf, type CategoryId } from "@/data";
 import { TEMPLATES, buildTemplateHtml } from "@/lib/templates";
 import { readMinutes } from "@/lib/format";
+import ImageField from "@/components/ImageField";
 
 // Supabase 초안 row (어느 기기에서든 이어쓰기)
 interface DraftRow {
@@ -375,12 +376,12 @@ POST2: 관련 글 제목 2|한 줄 설명
                   ))}
                 </div>
               </div>
-              <div className="field">
-                <label>대표 이미지 (사진 주소)</label>
-                <span className="hint">사진 URL을 넣으면 기사 맨 위에 표시돼요. 비우면 아래 색상 배너가 쓰여요.</span>
-                <input value={d.imageUrl} onChange={(e) => set("imageUrl", e.target.value)}
-                  placeholder="https://...jpg" autoComplete="off" spellCheck={false} />
-              </div>
+              <ImageField
+                label="대표 이미지"
+                hint="사진을 올리면 기사 맨 위에 표시돼요. 비우면 아래 색상 배너가 쓰여요."
+                value={d.imageUrl}
+                onChange={(url) => set("imageUrl", url)}
+              />
               <div className="field">
                 <label>대문 카드 배경색 <span className="hint">· 대표 이미지가 없을 때</span></label>
                 <div className="swatches">

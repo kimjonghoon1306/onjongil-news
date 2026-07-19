@@ -77,6 +77,17 @@ svg { display: block; }
 .masthead { background: var(--surface); }
 .masthead-inner { display: flex; align-items: center; justify-content: space-between; padding: 22px 0 20px; }
 .brand { display: flex; flex-direction: column; line-height: 1; }
+/* 제호 한자 도장(溫) */
+.brand-withseal { flex-direction: row; align-items: center; gap: 13px; }
+.brand-txt { display: flex; flex-direction: column; line-height: 1; }
+.brand-seal {
+  font-family: "Noto Serif KR", serif; font-weight: 900; font-size: 27px; line-height: 1;
+  color: var(--accent); width: 48px; height: 48px; display: grid; place-items: center;
+  border: 2.5px solid var(--accent); border-radius: 9px; flex-shrink: 0;
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1), background .2s, color .2s;
+}
+.brand-withseal:hover .brand-seal { background: var(--accent); color: #fff; transform: rotate(-6deg) scale(1.05); }
+@media (max-width: 640px) { .brand-seal { width: 40px; height: 40px; font-size: 23px; } }
 .brand-ko { font-family: "Noto Serif KR", serif; font-weight: 900; font-size: 36px; letter-spacing: -2px; color: var(--navy); }
 .brand-en { font-size: 11px; font-weight: 700; letter-spacing: 5px; color: var(--text-dim); margin-top: 7px; }
 .masthead-right { display: flex; align-items: center; gap: 12px; }
@@ -376,6 +387,16 @@ svg { display: block; }
 .check-row input { width: 20px; height: 20px; accent-color: var(--accent); flex-shrink: 0; }
 .publish-done { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 18px; border-radius: 12px; background: #f0faf4; border: 1.5px solid #16a34a; font-size: 15px; font-weight: 800; color: #15803d; }
 [data-theme="dark"] .publish-done { background: rgba(22,163,74,.15); }
+
+/* 이미지 업로드 필드 */
+.imgfield-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.imgfield-url { flex: 1; min-width: 180px; font-family: inherit; font-size: 15px; color: var(--text); background: var(--surface); border: 1.5px solid var(--line); border-radius: 11px; padding: 12px 14px; outline: none; }
+.imgfield-url:focus { border-color: var(--accent); }
+.imgfield-preview { position: relative; margin-bottom: 4px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--soft); }
+.imgfield-preview img { width: 100%; max-height: 220px; object-fit: contain; display: block; }
+.imgfield-remove { position: absolute; top: 8px; right: 8px; font-size: 12.5px; font-weight: 700; color: #fff; background: rgba(0,0,0,.55); padding: 6px 11px; border-radius: 8px; }
+.imgfield-remove:hover { background: var(--accent); }
+.imgfield-err { font-size: 13.5px; font-weight: 700; color: #dc2626; }
 
 /* 광고 관리 */
 .ad-preview-box { border: 1.5px solid var(--line); border-radius: 14px; padding: 20px; background: var(--surface); box-shadow: var(--shadow); position: sticky; top: 80px; }

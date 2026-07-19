@@ -76,9 +76,12 @@ export default function SiteHeader() {
       {/* 2) 로고 헤더 */}
       <header className="masthead">
         <div className="wrap masthead-inner">
-          <Link className="brand" href="/">
-            <span className="brand-ko">온종일뉴스</span>
-            <span className="brand-en">ONJONGIL NEWS</span>
+          <Link className="brand brand-withseal" href="/">
+            <span className="brand-seal" aria-hidden="true">溫</span>
+            <span className="brand-txt">
+              <span className="brand-ko">온종일뉴스</span>
+              <span className="brand-en">ONJONGIL NEWS</span>
+            </span>
           </Link>
           <div className="masthead-right">
             <button

@@ -27,7 +27,7 @@ export async function generateMetadata(
     openGraph: {
       type: "article", title: a.title, description: a.excerpt,
       publishedTime: a.publishedAt, modifiedTime: a.updatedAt,
-      images: a.imageUrl ? [a.imageUrl] : undefined,
+      images: a.imageUrl ? [a.imageUrl] : [`/article/${id}/opengraph-image`],
       authors: [REPORTERS[a.reporter]?.name ?? "온종일뉴스"],
     },
   };
