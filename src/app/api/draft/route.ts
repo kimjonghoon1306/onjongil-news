@@ -27,24 +27,56 @@ const GUIDE = `당신은 온종일뉴스의 기사 초안 작성 보조입니다
 온종일뉴스는 정치를 뺀 실용정보 매체로, 사장님·창업자·소상공인에게 진짜 도움 되는 정보를 전합니다.
 톤은 친근하지만 신뢰감 있게, 반말이 아닌 쉽고 따뜻한 설명체입니다.
 
-규칙:
-- 본문은 마크다운형: 소제목은 "## 소제목", 강조 상자는 줄 맨 앞에 [팁] / [주의] / [중요].
-- 소제목 3~4개, 각 문단 2~4문장, 전체 700~1100자.
+[본문 규칙]
+- 소제목은 "## 소제목" 형식으로 3~4개.
+- 각 문단 2~4문장, 본문 전체 700~1100자.
+- 핵심 정보에는 강조 상자를 1~3개: 줄 맨 앞에 [팁] 또는 [주의] 또는 [중요].
 - 과장·확정 표현을 피하고, 수치·조건은 "공식 공고를 확인하세요"처럼 검증 여지를 남긴다.
 - 사실을 지어내지 말 것. 불확실하면 일반적 설명으로.
-- 반드시 아래 JSON만 출력(그 외 텍스트 금지):
-{"excerpt": "한 줄 요약(45자 내외)", "body": "본문(마크다운형)"}`;
+
+[본문 다음에 아래 3개 블록을 순서대로 반드시 이어서 넣는다]
+(1) 참고자료 — 주제와 관련된 공신력 있는 기관 2~3개:
+[참고자료시작]
+LINK1: 기관 이름|한 줄 설명|공식 홈페이지 대표 주소
+[참고자료끝]
+※ URL은 널리 알려진 공식 기관의 대표 홈페이지만 쓴다(예: 중소벤처기업부 https://www.mss.go.kr, 소상공인시장진흥공단 https://www.semas.or.kr, 국세청 https://www.nts.go.kr). 특정 공고의 상세 URL은 지어내지 말 것. 마땅한 기관이 없으면 이 블록은 생략한다.
+
+(2) 자주 묻는 질문 2~3개:
+[FAQ시작]
+Q1: 독자가 궁금해할 질문
+A1: 쉽고 명확한 답변
+[FAQ끝]
+
+(3) 관련 글 — 이 주제와 이어지는 글 제목 2~3개:
+[관련글시작]
+POST1: 관련 글 제목|한 줄 설명
+[관련글끝]
+
+[출력 형식]
+- 본문(마크다운형)과 위 3개 블록을 모두 담아 아래 JSON 하나로만 출력. 그 외 텍스트·설명·코드블록 표시 금지.
+- 본문 안에서는 큰따옴표(") 대신 작은따옴표(')를 사용한다(JSON 깨짐 방지).
+{"excerpt": "한 줄 요약(45자 내외)", "body": "본문과 3개 블록 전체"}`;
 
 // 응답 텍스트에서 JSON만 뽑아 {excerpt, body}로
 function parseDraft(text: string): { excerpt: string; body: string } | null {
   const m = text.match(/\{[\s\S]*\}/);
   if (!m) return null;
+  // 1차: 정상 JSON 파싱
   try {
     const p = JSON.parse(m[0]);
-    return { excerpt: (p.excerpt || "").toString(), body: (p.body || "").toString() };
-  } catch {
-    return null;
-  }
+    const body = (p.body || "").toString();
+    if (body.trim()) return { excerpt: (p.excerpt || "").toString(), body };
+  } catch { /* 2차 폴백 */ }
+  // 2차: 본문에 큰따옴표가 섞여 JSON이 깨진 경우 — 정규식으로 excerpt/body 추출
+  try {
+    const ex = m[0].match(/"excerpt"\s*:\s*"([\s\S]*?)"\s*,\s*"body"/);
+    const bo = m[0].match(/"body"\s*:\s*"([\s\S]*)"\s*\}?\s*$/);
+    if (bo) {
+      const unescape = (s: string) => s.replace(/\\n/g, "\n").replace(/\\"/g, '"').replace(/\\t/g, "\t").replace(/\\\\/g, "\\");
+      return { excerpt: ex ? unescape(ex[1]) : "", body: unescape(bo[1]) };
+    }
+  } catch { /* 실패 */ }
+  return null;
 }
 
 // 한도/일시 오류면 다음 모델로 넘어가야 하는지 판단
@@ -94,7 +126,7 @@ export async function POST(req: Request) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { maxOutputTokens: 4096 },
+              generationConfig: { maxOutputTokens: 6144 },
             }),
           }
         );
@@ -132,7 +164,7 @@ export async function POST(req: Request) {
               { role: "system", content: "당신은 온종일뉴스 기사 초안 작성 보조입니다. 반드시 지정된 JSON만 출력하세요." },
               { role: "user", content: prompt },
             ],
-            max_tokens: 4096,
+            max_tokens: 6000,
             temperature: 0.7,
           }),
         });
