@@ -366,6 +366,10 @@ svg { display: block; }
 .publish-done { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 18px; border-radius: 12px; background: #f0faf4; border: 1.5px solid #16a34a; font-size: 15px; font-weight: 800; color: #15803d; }
 [data-theme="dark"] .publish-done { background: rgba(22,163,74,.15); }
 
+/* 광고 관리 */
+.ad-preview-box { border: 1.5px solid var(--line); border-radius: 14px; padding: 20px; background: var(--surface); box-shadow: var(--shadow); position: sticky; top: 80px; }
+.ad-dot-preview { flex-shrink: 0; width: 44px; height: 30px; border-radius: 6px; border: 1px solid var(--line); background-position: center; }
+
 /* 하단 고정 액션바 */
 .admin-actions { position: sticky; bottom: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 4px 0 0; padding: 14px 20px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(12px); box-shadow: 0 -6px 22px rgba(16,24,40,.1); }
 .admin-actions-secondary, .admin-actions-primary { display: flex; align-items: center; gap: 12px; }

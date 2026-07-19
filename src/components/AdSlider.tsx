@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ADS, type Ad } from "@/data";
+import { type Ad } from "@/data";
 import { PauseIcon, PlayIcon } from "@/icons";
 
 function AdInner({ ad }: { ad: Ad }) {
@@ -41,16 +41,19 @@ function AdInner({ ad }: { ad: Ad }) {
   );
 }
 
-export default function AdSlider() {
+export default function AdSlider({ ads }: { ads: Ad[] }) {
+  const ADS = ads ?? [];
   const [i, setI] = useState(0);
   const [playing, setPlaying] = useState(true);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (!playing) return;
+    if (!playing || ADS.length === 0) return;
     timer.current = setInterval(() => setI((p) => (p + 1) % ADS.length), 3500);
     return () => { if (timer.current) clearInterval(timer.current); };
-  }, [playing]);
+  }, [playing, ADS.length]);
+
+  if (ADS.length === 0) return null;
 
   return (
     <div

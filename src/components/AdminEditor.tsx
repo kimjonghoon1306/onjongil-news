@@ -276,6 +276,7 @@ POST2: 관련 글 제목 2|한 줄 설명
       <div className="admin-top">
         <h1><span className="admin-badge">관리자</span> 기사 작성</h1>
         <div className="admin-top-btns">
+          <Link className="btn btn-ghost" href="/admin/ads">📢 광고 관리</Link>
           <a className="btn btn-ghost" href="/" target="_blank" rel="noreferrer">📄 기사 보러가기</a>
           <button className="btn btn-ghost" onClick={logout}>로그아웃</button>
         </div>
