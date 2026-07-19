@@ -128,6 +128,12 @@ export const MailIcon = ({ size, className, strokeWidth }: P) => (
     <path d="M4 7l8 6 8-6" />
   </svg>
 );
+export const GearIcon = ({ size, className, strokeWidth }: P) => (
+  <svg {...base(size, strokeWidth)} className={className}>
+    <circle cx="12" cy="12" r="3.2" />
+    <path d="M12 3v2.2M12 18.8V21M4.2 7.5l1.9 1.1M17.9 15.4l1.9 1.1M4.2 16.5l1.9-1.1M17.9 8.6l1.9-1.1" />
+  </svg>
+);
 export const BookIcon = ({ size, className, strokeWidth }: P) => (
   <svg {...base(size, strokeWidth)} className={className}>
     <path d="M4 5a2 2 0 0 1 2-2h5v16H6a2 2 0 0 0-2 2V5z" />

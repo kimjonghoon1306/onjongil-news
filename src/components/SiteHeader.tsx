@@ -69,8 +69,6 @@ export default function SiteHeader() {
             <span className="util-sep" />
             <ClockIcon size={13} strokeWidth={2} />
             <span className="util-live">실시간 업데이트</span>
-            <span className="util-sep" />
-            <Link href="/admin">관리자</Link>
           </div>
         </div>
       </div>

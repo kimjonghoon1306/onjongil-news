@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import AdminGear from "@/components/AdminGear";
 
 const SITE = "온종일뉴스";
 const DESC =
@@ -54,6 +55,7 @@ export default function RootLayout({
         <SiteHeader />
         {children}
         <SiteFooter />
+        <AdminGear />
       </body>
     </html>
   );
