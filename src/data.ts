@@ -30,11 +30,11 @@ export interface Reporter {
   email: string;
 }
 export const REPORTERS: Record<string, Reporter> = {
-  desk:      { id: "desk",      name: "온종일뉴스 편집팀", role: "편집국", email: "desk@onjongilnews.com" },
-  jiwon:     { id: "jiwon",     name: "김지원 기자",       role: "AI·테크",  email: "jiwon@onjongilnews.com" },
-  sumin:     { id: "sumin",     name: "이수민 기자",       role: "생활경제", email: "sumin@onjongilnews.com" },
-  daepyo:    { id: "daepyo",    name: "박대표 기자",       role: "창업",     email: "daepyo@onjongilnews.com" },
-  marketing: { id: "marketing", name: "최마케팅 기자",     role: "마케팅",   email: "choi@onjongilnews.com" },
+  desk:      { id: "desk",      name: "온종일뉴스 편집팀", role: "편집국", email: "tarry9653@daum.net" },
+  jiwon:     { id: "jiwon",     name: "김지원 기자",       role: "AI·테크",  email: "tarry9653@daum.net" },
+  sumin:     { id: "sumin",     name: "이수민 기자",       role: "생활경제", email: "tarry9653@daum.net" },
+  daepyo:    { id: "daepyo",    name: "박대표 기자",       role: "창업",     email: "tarry9653@daum.net" },
+  marketing: { id: "marketing", name: "최마케팅 기자",     role: "마케팅",   email: "tarry9653@daum.net" },
 };
 
 export interface Article {

@@ -132,7 +132,7 @@ export default async function ArticlePage(
             </p>
           )}
           <p className="correction">
-            사실과 다른 내용이 있나요? <a href="mailto:desk@onjongilnews.com">정정·오류 신고</a> ·
+            사실과 다른 내용이 있나요? <a href="mailto:tarry9653@daum.net">정정·오류 신고</a> ·
             기사번호 {a.id.toUpperCase()}
           </p>
         </div>

@@ -34,8 +34,8 @@ export default function TipPage() {
           <div className="contact-card">
             <h3>제보 이메일</h3>
             <p>제목에 [제보]를 붙여 보내주세요.</p>
-            <a href="mailto:tip@onjongilnews.com?subject=%5B%EC%A0%9C%EB%B3%B4%5D%20">
-              <MailIcon size={16} strokeWidth={2} /> tip@onjongilnews.com
+            <a href="mailto:tarry9653@daum.net?subject=%5B%EC%A0%9C%EB%B3%B4%5D%20">
+              <MailIcon size={16} strokeWidth={2} /> tarry9653@daum.net
             </a>
           </div>
         </div>

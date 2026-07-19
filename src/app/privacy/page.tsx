@@ -81,7 +81,7 @@ export default function PrivacyPage() {
         <table className="info-table">
           <tbody>
             <tr><th>보호책임자</th><td>테리 (온종일뉴스 편집국)</td></tr>
-            <tr><th>연락처</th><td><a href="mailto:privacy@onjongilnews.com">privacy@onjongilnews.com</a></td></tr>
+            <tr><th>연락처</th><td><a href="mailto:tarry9653@daum.net">tarry9653@daum.net</a></td></tr>
           </tbody>
         </table>
 

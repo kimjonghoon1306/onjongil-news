@@ -21,7 +21,7 @@ export default function SiteFooter() {
         <div className="footer-slogan">정치는 뺀다. 진짜 도움 되는 것만 전합니다.</div>
         <div className="footer-reg">
           온종일뉴스 · 발행인 테리 · 편집인 테리 · 인터넷신문 등록번호 (등록 예정) ·
-          청소년보호책임자 테리 · 대표전화 준비중 · 이메일 desk@onjongilnews.com<br />
+          청소년보호책임자 테리 · 대표전화 준비중 · 이메일 tarry9653@daum.net<br />
           © 2026 ONJONGIL NEWS. 온종일그룹. All rights reserved.
         </div>
       </div>

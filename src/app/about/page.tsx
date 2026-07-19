@@ -15,6 +15,20 @@ export default function AboutPage() {
         <p>정치는 뺀다. 사장님·창업자·소상공인에게 진짜 도움 되는 것만 전합니다.</p>
       </div>
 
+      {/* 브랜드 비주얼 */}
+      <div className="about-visual" aria-hidden="true">
+        <div className="about-visual-grid" />
+        <div className="about-visual-inner">
+          <span className="av-brand">온종일뉴스</span>
+          <span className="av-en">ONJONGIL NEWS</span>
+          <span className="av-tag">사장님의 하루에 힘이 되는 실용 뉴스</span>
+          <div className="av-chips">
+            <span>AI</span><span>정부지원금</span><span>프랜차이즈</span>
+            <span>마케팅</span><span>컨설팅</span><span>무료 툴</span>
+          </div>
+        </div>
+      </div>
+
       <div className="prose">
         <h2>우리는 왜 시작했나요</h2>
         <p>

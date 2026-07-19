@@ -16,9 +16,9 @@ interface Draft {
   body: string;
   source: string;
   aiAssisted: boolean;
-  image: string;       // 대문 카드 배경(색상)
-  imageUrl: string;    // 대표 이미지(사진 주소)
-  template: string;    // 글 템플릿
+  image: string;
+  imageUrl: string;
+  template: string;
   savedAt: number;
 }
 
@@ -42,8 +42,8 @@ export default function AdminEditor() {
   const [list, setList] = useState<Draft[]>([]);
   const [msg, setMsg] = useState<{ t: string; ok: boolean } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
 
-  // AI 키 (관리자가 직접 교체 · 브라우저에 저장)
   const [geminiKey, setGeminiKey] = useState("");
   const [groqKey, setGroqKey] = useState("");
   const [showKeys, setShowKeys] = useState(false);
@@ -79,6 +79,7 @@ export default function AdminEditor() {
   };
 
   const cat = catOf(d.category);
+  const tpl = TEMPLATES.find((t) => t.id === d.template);
   const previewHtml = useMemo(
     () => buildTemplateHtml(d.template, d.title || "제목을 입력하세요", d.body || d.excerpt || "", d.imageUrl),
     [d.template, d.title, d.body, d.excerpt, d.imageUrl]
@@ -88,12 +89,12 @@ export default function AdminEditor() {
     if (!d.title.trim()) return flash("제목을 입력해 주세요.", false);
     if (editId) {
       persist(list.map((x) => (x.id === editId ? { ...x, ...d, savedAt: Date.now() } : x)));
-      flash("수정 내용을 저장했어요.");
+      flash("수정 내용을 임시저장했어요.");
     } else {
       const item: Draft = { ...d, id: "d" + Date.now(), savedAt: Date.now() };
       persist([item, ...list]);
       setEditId(item.id);
-      flash("기사를 저장했어요. (임시저장 · 브라우저)");
+      flash("임시저장했어요. (브라우저에 보관 · 발행은 다음 단계)");
     }
   };
 
@@ -116,15 +117,12 @@ export default function AdminEditor() {
       const res = await fetch("/api/draft", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: d.title, category: cat.name,
-          geminiKey: geminiKey.trim(), groqKey: groqKey.trim(),
-        }),
+        body: JSON.stringify({ title: d.title, category: cat.name, geminiKey: geminiKey.trim(), groqKey: groqKey.trim() }),
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "생성 실패");
       setD((p) => ({ ...p, excerpt: j.excerpt || p.excerpt, body: j.body || p.body, aiAssisted: true }));
-      flash("AI 초안을 불러왔어요. 사실 확인 후 발행하세요.");
+      flash("AI 초안을 불러왔어요. 사실 확인 후 저장하세요.");
     } catch (e) {
       flash(e instanceof Error ? e.message : "AI 생성에 실패했어요.", false);
     } finally {
@@ -136,13 +134,13 @@ export default function AdminEditor() {
     <main className="wrap admin">
       <div className="admin-top">
         <h1><span className="admin-badge">관리자</span> 기사 작성</h1>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="admin-top-btns">
           <Link className="btn btn-ghost" href="/">← 대문 보기</Link>
           <button className="btn btn-ghost" onClick={logout}>로그아웃</button>
         </div>
       </div>
 
-      {/* AI 키 설정 */}
+      {/* 환경설정: AI 키 */}
       <details className="ai-keys">
         <summary>
           <span>⚙ AI 키 설정</span>
@@ -177,96 +175,136 @@ export default function AdminEditor() {
       <div className="admin-grid">
         {/* ===== 폼 ===== */}
         <div className="admin-col-form">
-          <div className="admin-form">
-            <div className="field">
-              <label>제목</label>
-              <input value={d.title} onChange={(e) => set("title", e.target.value)} placeholder="독자가 클릭하고 싶은 제목" />
+          {/* 섹션 1 · 기본 정보 */}
+          <section className="admin-section">
+            <div className="admin-section-head">
+              <h2 className="admin-section-title">1 · 기본 정보</h2>
+              <p className="admin-section-desc">기사의 제목과 분류를 정합니다.</p>
             </div>
-
-            <div className="field-row">
-              <div className="field">
-                <label>카테고리</label>
-                <select value={d.category} onChange={(e) => set("category", e.target.value as CategoryId)}>
-                  {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
+            <div className="admin-section-fields">
+              <div className="field field--title">
+                <label>제목</label>
+                <input value={d.title} onChange={(e) => set("title", e.target.value)} placeholder="독자가 클릭하고 싶은 제목" />
+              </div>
+              <div className="field-row">
+                <div className="field">
+                  <label>카테고리</label>
+                  <select value={d.category} onChange={(e) => set("category", e.target.value as CategoryId)}>
+                    {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>기자 (바이라인)</label>
+                  <select value={d.reporter} onChange={(e) => set("reporter", e.target.value)}>
+                    {Object.values(REPORTERS).map((r) => <option key={r.id} value={r.id}>{r.name} · {r.role}</option>)}
+                  </select>
+                </div>
               </div>
               <div className="field">
-                <label>기자 (바이라인)</label>
-                <select value={d.reporter} onChange={(e) => set("reporter", e.target.value)}>
-                  {Object.values(REPORTERS).map((r) => <option key={r.id} value={r.id}>{r.name} · {r.role}</option>)}
-                </select>
+                <label>요약 (한 줄 소개)</label>
+                <input value={d.excerpt} onChange={(e) => set("excerpt", e.target.value)} placeholder="목록·검색·공유에 쓰이는 짧은 소개" />
               </div>
             </div>
+          </section>
 
-            <div className="field">
-              <label>요약 (한 줄 소개)</label>
-              <input value={d.excerpt} onChange={(e) => set("excerpt", e.target.value)} placeholder="목록·검색·공유에 쓰이는 짧은 소개" />
+          {/* 섹션 2 · 디자인 */}
+          <section className="admin-section">
+            <div className="admin-section-head">
+              <h2 className="admin-section-title">2 · 디자인</h2>
+              <p className="admin-section-desc">글 레이아웃과 대표 이미지를 고릅니다.</p>
             </div>
+            <div className="admin-section-fields">
+              <div className="field">
+                <label>글 템플릿 <span className="hint">· 레이아웃·색상이 달라져요</span></label>
+                <div className="tpl-grid">
+                  {TEMPLATES.map((t) => (
+                    <button key={t.id} type="button" aria-pressed={d.template === t.id}
+                      className={"tpl-card" + (d.template === t.id ? " on" : "")}
+                      onClick={() => set("template", t.id)}
+                      style={d.template === t.id ? { borderColor: t.accent, color: t.accent } : undefined}>
+                      <span className="tpl-emoji" style={{ background: t.grad }}>{t.emoji}</span>
+                      <span className="tpl-name">{t.name}</span>
+                      <span className="tpl-desc">{t.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="field">
+                <label>대표 이미지 (사진 주소)</label>
+                <span className="hint">사진 URL을 넣으면 기사 맨 위에 표시돼요. 비우면 아래 색상 배너가 쓰여요.</span>
+                <input value={d.imageUrl} onChange={(e) => set("imageUrl", e.target.value)}
+                  placeholder="https://...jpg" autoComplete="off" spellCheck={false} />
+              </div>
+              <div className="field">
+                <label>대문 카드 배경색 <span className="hint">· 대표 이미지가 없을 때</span></label>
+                <div className="swatches">
+                  {SWATCHES.map((s) => (
+                    <button key={s} type="button" className={"swatch" + (d.image === s ? " on" : "")}
+                      style={{ background: s }} onClick={() => set("image", s)} aria-label="색상 선택" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
 
-            {/* 글 템플릿 선택 (9종) */}
-            <div className="field">
-              <label>글 템플릿 <span className="hint">· 레이아웃·색상이 달라져요</span></label>
-              <div className="tpl-grid">
-                {TEMPLATES.map((t) => (
-                  <button key={t.id} type="button"
-                    className={"tpl-card" + (d.template === t.id ? " on" : "")}
-                    onClick={() => set("template", t.id)}
-                    style={d.template === t.id ? { borderColor: t.accent } : undefined}>
-                    <span className="tpl-emoji" style={{ background: t.grad }}>{t.emoji}</span>
-                    <span className="tpl-name">{t.name}</span>
-                    <span className="tpl-desc">{t.desc}</span>
+          {/* 섹션 3 · 본문 */}
+          <section className="admin-section">
+            <div className="admin-section-head">
+              <h2 className="admin-section-title">3 · 본문</h2>
+              <p className="admin-section-desc">소제목·강조·참고링크로 기사를 채웁니다.</p>
+            </div>
+            <div className="admin-section-fields">
+              <div className="field">
+                <div className="field-label-row">
+                  <label>본문</label>
+                  <button type="button" className="btn btn-ai btn-sm" onClick={genAI} disabled={aiLoading}>
+                    {aiLoading ? "AI 작성 중…" : "✦ AI 초안"}
                   </button>
-                ))}
+                </div>
+                <textarea value={d.body} onChange={(e) => set("body", e.target.value)}
+                  placeholder={"본문을 입력하세요.\n\n## 소제목 예시\n[팁] 도움 되는 팁을 여기에"} />
+                <details className="editor-help">
+                  <summary>본문 문법 도움말</summary>
+                  <div className="editor-help-body">
+                    <p><b>## 소제목</b> — 소제목(목차 자동 생성) · <b>[팁] [주의] [중요]</b> — 강조 상자</p>
+                    <p>참고링크·FAQ·관련글은 아래처럼 넣으면 템플릿에 맞게 정리돼요(선택):</p>
+                    <pre>{`[참고자료시작]
+LINK1: 중소벤처기업부|공식 공고|https://www.mss.go.kr
+[참고자료끝]
+
+[FAQ시작]
+Q1: 궁금한 점은?
+A1: 이렇게 답해요.
+[FAQ끝]
+
+[관련글시작]
+POST1: 관련 글 제목|한 줄 설명
+[관련글끝]`}</pre>
+                  </div>
+                </details>
               </div>
             </div>
+          </section>
 
-            {/* 대표 이미지 */}
-            <div className="field">
-              <label>대표 이미지 (사진 주소)</label>
-              <span className="hint">사진 URL을 넣으면 기사 맨 위에 표시돼요. 비우면 아래 색상 배너가 쓰여요.</span>
-              <input value={d.imageUrl} onChange={(e) => set("imageUrl", e.target.value)}
-                placeholder="https://...jpg" autoComplete="off" spellCheck={false} />
+          {/* 섹션 4 · 출처 */}
+          <section className="admin-section">
+            <div className="admin-section-head">
+              <h2 className="admin-section-title">4 · 출처</h2>
+              <p className="admin-section-desc">신뢰를 위한 자료 출처(선택).</p>
             </div>
-
-            <div className="field">
-              <label>대문 카드 배경색 <span className="hint">· 대표 이미지가 없을 때</span></label>
-              <div className="swatches">
-                {SWATCHES.map((s) => (
-                  <button key={s} type="button" className={"swatch" + (d.image === s ? " on" : "")}
-                    style={{ background: s }} onClick={() => set("image", s)} aria-label="색상 선택" />
-                ))}
+            <div className="admin-section-fields">
+              <div className="field">
+                <label>자료 출처</label>
+                <input value={d.source} onChange={(e) => set("source", e.target.value)} placeholder="예: 중소벤처기업부 공고 / 인터뷰" />
               </div>
             </div>
-
-            <div className="field">
-              <label>본문</label>
-              <span className="hint">
-                소제목 <b>## 제목</b> · 강조 <b>[팁] [주의] [중요]</b> · 목차는 자동 생성돼요.<br />
-                참고링크·FAQ·관련글은 아래 문법으로 추가할 수 있어요(선택):
-              </span>
-              <textarea value={d.body} onChange={(e) => set("body", e.target.value)}
-                placeholder={"본문을 입력하세요.\n\n## 소제목 예시\n[팁] 도움 되는 팁을 여기에\n\n[참고자료시작]\nLINK1: 중소벤처기업부|공식 공고|https://www.mss.go.kr\n[참고자료끝]\n\n[FAQ시작]\nQ1: 궁금한 점은?\nA1: 이렇게 답해요.\n[FAQ끝]\n\n[관련글시작]\nPOST1: 관련 글 제목|한 줄 설명\n[관련글끝]"} />
-            </div>
-
-            <div className="field">
-              <label>자료 출처 (선택)</label>
-              <input value={d.source} onChange={(e) => set("source", e.target.value)} placeholder="예: 중소벤처기업부 공고 / 인터뷰" />
-            </div>
-
-            {msg && <div className={"admin-msg " + (msg.ok ? "ok" : "err")}>{msg.t}</div>}
-
-            <div className="admin-actions">
-              <button className="btn btn-ai" onClick={genAI} disabled={aiLoading}>
-                {aiLoading ? "AI가 작성 중…" : "✦ AI 초안 생성"}
-              </button>
-              <button className="btn btn-primary" onClick={save}>{editId ? "수정 저장" : "기사 저장"}</button>
-              <button className="btn btn-ghost" onClick={newDraft}>새 기사</button>
-            </div>
-          </div>
+          </section>
 
           {/* 저장 목록 */}
-          <div className="admin-saved">
-            <h2>임시저장한 기사 ({list.length})</h2>
+          <section className="admin-section">
+            <div className="admin-section-head">
+              <h2 className="admin-section-title">임시저장한 기사 <span className="count-badge">{list.length}</span></h2>
+            </div>
             {list.length === 0
               ? <p className="hint">아직 저장한 기사가 없어요.</p>
               : (
@@ -285,18 +323,39 @@ export default function AdminEditor() {
                   })}
                 </div>
               )}
+          </section>
+
+          {/* 하단 고정 액션바 */}
+          <div className="admin-actions">
+            <div className="admin-actions-secondary">
+              <button className="btn btn-ghost" onClick={newDraft}>새 기사</button>
+              {msg && <span className={"admin-inline-msg " + (msg.ok ? "ok" : "err")}>{msg.t}</span>}
+            </div>
+            <div className="admin-actions-primary">
+              <button className="btn btn-primary" onClick={save}>{editId ? "임시저장 (수정)" : "임시저장"}</button>
+            </div>
           </div>
         </div>
 
-        {/* ===== 미리보기 (선택 템플릿) ===== */}
+        {/* ===== 미리보기 ===== */}
         <div className="admin-col-preview">
-          <div className="preview-label">실시간 미리보기 · {TEMPLATES.find((t) => t.id === d.template)?.name}</div>
-          <div className="preview-box">
-            {!d.title && !d.body ? (
-              <div className="preview-empty">제목과 본문을 입력하면<br />선택한 템플릿으로 보여요.</div>
-            ) : (
-              <div className="tpl-preview" dangerouslySetInnerHTML={{ __html: previewHtml }} />
-            )}
+          <div className="preview-panel">
+            <div className="preview-toolbar">
+              <span className="preview-ttl">기사 미리보기 · {tpl?.name}</span>
+              <div className="preview-tabs" role="tablist">
+                <button className={"preview-tab" + (previewMode === "desktop" ? " on" : "")}
+                  onClick={() => setPreviewMode("desktop")}>데스크톱</button>
+                <button className={"preview-tab" + (previewMode === "mobile" ? " on" : "")}
+                  onClick={() => setPreviewMode("mobile")}>모바일</button>
+              </div>
+            </div>
+            <div className="preview-stage">
+              <div className={"preview-device preview-device--" + previewMode}>
+                {!d.title && !d.body
+                  ? <div className="preview-empty">제목과 본문을 입력하면<br />선택한 템플릿으로 보여요.</div>
+                  : <div className="tpl-preview" dangerouslySetInnerHTML={{ __html: previewHtml }} />}
+              </div>
+            </div>
           </div>
         </div>
       </div>

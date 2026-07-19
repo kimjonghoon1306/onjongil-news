@@ -58,7 +58,7 @@ export default function EthicsPage() {
 
         <div className="page-note">
           윤리강령 위반이 의심되거나 정정이 필요하면{" "}
-          <a href="mailto:desk@onjongilnews.com">desk@onjongilnews.com</a> 또는{" "}
+          <a href="mailto:tarry9653@daum.net">tarry9653@daum.net</a> 또는{" "}
           <Link href="/contact">문의 페이지</Link>로 알려주세요.
         </div>
 

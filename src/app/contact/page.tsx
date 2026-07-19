@@ -32,22 +32,22 @@ export default function ContactPage() {
           <div className="contact-card">
             <h3>광고 문의</h3>
             <p>배너·협찬 등 광고 상품 안내와 단가를 보내드립니다.</p>
-            <a href="mailto:ad@onjongilnews.com">
-              <MailIcon size={16} strokeWidth={2} /> ad@onjongilnews.com
+            <a href="mailto:tarry9653@daum.net">
+              <MailIcon size={16} strokeWidth={2} /> tarry9653@daum.net
             </a>
           </div>
           <div className="contact-card">
             <h3>제휴 문의</h3>
             <p>공동 기획·이벤트·콘텐츠 제휴를 제안해 주세요.</p>
-            <a href="mailto:partner@onjongilnews.com">
-              <MailIcon size={16} strokeWidth={2} /> partner@onjongilnews.com
+            <a href="mailto:tarry9653@daum.net">
+              <MailIcon size={16} strokeWidth={2} /> tarry9653@daum.net
             </a>
           </div>
           <div className="contact-card">
             <h3>일반 문의</h3>
             <p>그 밖의 모든 문의는 편집국으로 연락 주세요.</p>
-            <a href="mailto:desk@onjongilnews.com">
-              <MailIcon size={16} strokeWidth={2} /> desk@onjongilnews.com
+            <a href="mailto:tarry9653@daum.net">
+              <MailIcon size={16} strokeWidth={2} /> tarry9653@daum.net
             </a>
           </div>
         </div>
@@ -58,7 +58,7 @@ export default function ContactPage() {
             <tr><th>매체명</th><td>온종일뉴스 (ONJONGIL NEWS)</td></tr>
             <tr><th>발행</th><td>온종일그룹 · 발행인 테리</td></tr>
             <tr><th>독자층</th><td>소상공인·자영업자·예비 창업자</td></tr>
-            <tr><th>연락처</th><td>대표전화 준비중 · desk@onjongilnews.com</td></tr>
+            <tr><th>연락처</th><td>대표전화 준비중 · tarry9653@daum.net</td></tr>
           </tbody>
         </table>
 
