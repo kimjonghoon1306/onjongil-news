@@ -88,7 +88,7 @@ svg { display: block; }
 }
 .brand-withseal:hover .brand-seal { background: var(--accent); color: #fff; transform: rotate(-6deg) scale(1.05); }
 @media (max-width: 640px) { .brand-seal { width: 40px; height: 40px; font-size: 23px; } }
-.brand-ko { font-family: "Noto Serif KR", serif; font-weight: 900; font-size: 36px; letter-spacing: -2px; color: var(--navy); }
+.brand-ko { font-family: "Noto Serif KR", serif; font-weight: 900; font-size: 36px; letter-spacing: -2px; color: var(--navy); white-space: nowrap; }
 .brand-en { font-size: 11px; font-weight: 700; letter-spacing: 5px; color: var(--text-dim); margin-top: 7px; }
 .masthead-right { display: flex; align-items: center; gap: 12px; }
 .mh-icon { width: 46px; height: 46px; border-radius: 10px; display: grid; place-items: center; color: var(--text); transition: background .18s, transform .15s; }
@@ -542,9 +542,12 @@ svg { display: block; }
 @media (max-width: 640px) {
   .wrap { padding: 0 16px; }
   .util-tagline, .util-live { display: none; }
-  .brand-ko { font-size: 28px; }
-  .mh-search input { width: 116px; }
-  .masthead-inner { padding: 16px 0 14px; }
+  .brand-ko { font-size: 27px; letter-spacing: -1.5px; }
+  .brand-en { font-size: 10px; letter-spacing: 3px; margin-top: 5px; }
+  .brand-withseal { gap: 10px; }
+  .mh-search input { width: 96px; padding: 12px 4px 12px 14px; font-size: 14px; }
+  .masthead-inner { padding: 16px 0 14px; gap: 10px; }
+  .masthead-right { gap: 8px; flex-shrink: 0; }
   .topstory { min-height: 360px; }
   .topstory h2 { font-size: 26px; }
   .topstory-body { padding: 24px; }
@@ -558,6 +561,13 @@ svg { display: block; }
   .card-grid { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 14px; padding-bottom: 6px; scrollbar-width: none; }
   .card-grid::-webkit-scrollbar { display: none; }
   .card { flex: 0 0 80%; scroll-snap-align: start; }
+}
+
+/* 아주 좁은 화면: 검색바를 돋보기 아이콘만 남겨 로고 자리 확보 */
+@media (max-width: 430px) {
+  .mh-search input { display: none; }
+  .mh-search { background: transparent; border-color: transparent; }
+  .mh-search button { padding: 0; width: 44px; height: 44px; }
 }
 
 @media print {
