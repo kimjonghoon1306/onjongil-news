@@ -22,6 +22,7 @@ interface DraftRow {
   image_url: string | null;
   template: string;
   featured: boolean;
+  status: string;
   updated_at: string;
 }
 
@@ -51,6 +52,7 @@ export default function AdminEditor() {
   const [publishing, setPublishing] = useState(false);
   const [lastPublished, setLastPublished] = useState<string | null>(null);
   const [featured, setFeatured] = useState(false);
+  const [editStatus, setEditStatus] = useState<string | null>(null); // 편집 중 기사의 발행 상태
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [fullPreview, setFullPreview] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -125,6 +127,8 @@ export default function AdminEditor() {
 
   const save = async () => {
     if (!d.title.trim()) return flash("제목을 입력해 주세요.", false);
+    if (editStatus === "published" &&
+        !confirm("이 기사는 이미 발행된 기사예요.\n\n'임시저장'하면 대문에서 잠시 내려갑니다. 수정한 내용을 대문에 바로 반영하려면 취소하고 아래 '발행' 버튼을 눌러주세요.\n\n그래도 임시저장할까요?")) return;
     setSaving(true);
     try {
       const res = await fetch("/api/drafts", {
@@ -140,6 +144,7 @@ export default function AdminEditor() {
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "저장 실패");
       setEditSlug(j.slug);
+      setEditStatus("draft");
       await loadDrafts();
       flash("임시저장했어요. 어느 기기에서든 이어쓸 수 있어요.");
     } catch (e) {
@@ -197,7 +202,7 @@ POST1: 관련 글 제목 1|한 줄 설명
 POST2: 관련 글 제목 2|한 줄 설명
 [관련글끝]`;
 
-  const newDraft = () => { setD(blank()); setEditSlug(null); setFeatured(false); flash("새 기사를 시작했어요."); };
+  const newDraft = () => { setD(blank()); setEditSlug(null); setFeatured(false); setEditStatus(null); flash("새 기사를 시작했어요."); };
   const edit = (x: DraftRow) => {
     setD({
       title: x.title, category: x.category, reporter: x.reporter_id || "desk",
@@ -207,6 +212,7 @@ POST2: 관련 글 제목 2|한 줄 설명
     });
     setEditSlug(x.slug);
     setFeatured(!!x.featured);
+    setEditStatus(x.status || "draft");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const remove = async (slug: string) => {
@@ -242,6 +248,7 @@ POST2: 관련 글 제목 2|한 줄 설명
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || "발행 실패");
       setEditSlug(null);
+      setEditStatus(null);
       setLastPublished(j.slug || null);
       await loadDrafts();
       flash("✅ 발행됐어요! 아래 '방금 발행한 기사 보기'로 확인하세요.");
@@ -282,6 +289,12 @@ POST2: 관련 글 제목 2|한 줄 설명
           <button className="btn btn-ghost" onClick={logout}>로그아웃</button>
         </div>
       </div>
+
+      {editStatus === "published" && (
+        <div className="editing-published">
+          📢 <b>이미 발행된 기사를 편집 중이에요.</b> 수정한 뒤 맨 아래 <b>‘발행’</b> 버튼을 누르면 대문에 바로 반영됩니다. (‘임시저장’을 누르면 대문에서 잠시 내려가요.)
+        </div>
+      )}
 
       {/* 환경설정: AI 키 */}
       <details className="ai-keys">
@@ -459,8 +472,8 @@ POST2: 관련 글 제목 2|한 줄 설명
           {/* 저장 목록 */}
           <section className="admin-section">
             <div className="admin-section-head">
-              <h2 className="admin-section-title">임시저장한 기사 <span className="count-badge">{list.length}</span></h2>
-              <p className="admin-section-desc">어느 기기에서든 이어서 쓸 수 있어요. (아직 대중에게는 안 보임)</p>
+              <h2 className="admin-section-title">저장·발행한 기사 <span className="count-badge">{list.length}</span></h2>
+              <p className="admin-section-desc">임시저장한 글과 <b>이미 발행한 기사</b>를 모두 여기서 수정할 수 있어요. 발행된 기사는 수정 후 아래 <b>‘발행’</b> 버튼을 눌러야 대문에 반영돼요.</p>
             </div>
             {list.length === 0
               ? <p className="hint">아직 저장한 기사가 없어요.</p>
@@ -468,13 +481,15 @@ POST2: 관련 글 제목 2|한 줄 설명
                 <div className="saved-list">
                   {list.map((x) => {
                     const c = catOf(x.category);
+                    const pub = x.status === "published";
                     return (
                       <div className="saved-item" key={x.slug}>
+                        <span className={"si-status " + (pub ? "pub" : "dft")}>{pub ? "발행됨" : "임시저장"}</span>
                         <span className="si-cat" style={{ background: c.color }}>{c.name}</span>
-                        <span className="si-title">{x.title || "(제목 없음)"}</span>
+                        <span className="si-title">{x.title || "(제목 없음)"}{x.featured && <b className="si-top"> ★톱</b>}</span>
                         <span className="si-date">{new Date(x.updated_at).toLocaleDateString("ko-KR")}</span>
                         <button onClick={() => edit(x)}>수정</button>
-                        <button onClick={() => remove(x.slug)}>삭제</button>
+                        {!pub && <button onClick={() => remove(x.slug)}>삭제</button>}
                       </div>
                     );
                   })}

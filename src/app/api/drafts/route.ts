@@ -17,8 +17,10 @@ export async function GET() {
   const sb = await guard();
   if (!sb) return Response.json({ error: "권한 없음" }, { status: 401 });
   const { data, error } = await sb.from("articles")
-    .select("slug,title,category,reporter_id,excerpt,body,source,image,image_url,template,ai_assisted,featured,updated_at")
-    .eq("status", "draft").order("updated_at", { ascending: false });
+    .select("slug,title,category,reporter_id,excerpt,body,source,image,image_url,template,ai_assisted,featured,status,updated_at")
+    .in("status", ["draft", "published"])
+    .order("updated_at", { ascending: false })
+    .limit(100);
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ drafts: data ?? [] });
 }

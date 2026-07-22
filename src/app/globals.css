@@ -469,6 +469,12 @@ svg { display: block; }
 .saved-item .si-cat { flex-shrink: 0; font-size: 11.5px; font-weight: 800; color: #fff; padding: 3px 9px; border-radius: 5px; }
 .saved-item .si-title { flex: 1; min-width: 0; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .saved-item .si-date { flex-shrink: 0; font-size: 12.5px; color: var(--text-dim); }
+.saved-item .si-status { flex-shrink: 0; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 5px; }
+.saved-item .si-status.pub { color: #fff; background: #059669; }
+.saved-item .si-status.dft { color: var(--text-dim); background: var(--soft); border: 1px solid var(--line); }
+.saved-item .si-top { color: #d97706; font-size: 12px; }
+.editing-published { margin: 0 0 18px; padding: 13px 16px; border-radius: 10px; font-size: 14.5px; line-height: 1.5; color: #92400e; background: #fef3c7; border: 1px solid #fde68a; }
+[data-theme="dark"] .editing-published { color: #fde68a; background: rgba(146,64,14,.22); border-color: rgba(253,230,138,.3); }
 .saved-item button { flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--text-dim); padding: 5px 9px; border-radius: 7px; transition: color .15s, background .15s; }
 .saved-item button:hover { color: var(--accent); background: var(--soft); }
 
