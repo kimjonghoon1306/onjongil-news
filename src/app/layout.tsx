@@ -25,6 +25,11 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", title: SITE, description: DESC },
   robots: { index: true, follow: true },
+  alternates: {
+    types: {
+      "application/rss+xml": [{ url: "/rss.xml", title: `${SITE} RSS` }],
+    },
+  },
 };
 
 // 테마 초기화 (FOUC 방지) — 저장된 다크/글자크기 값을 렌더 전에 적용
