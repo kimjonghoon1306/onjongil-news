@@ -289,7 +289,11 @@ svg { display: block; }
 .about-visual { position: relative; overflow: hidden; border-radius: 18px; margin: 0 0 34px; padding: 46px 32px; background: linear-gradient(135deg, var(--navy) 0%, #14315c 55%, #7a1420 100%); box-shadow: var(--shadow-lg); }
 [data-theme="dark"] .about-visual { background: linear-gradient(135deg, #0a1836 0%, #16243f 55%, #3a0d16 100%); }
 .about-visual-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px); background-size: 26px 26px; mask-image: radial-gradient(120% 80% at 80% 20%, #000 30%, transparent 75%); }
-.about-visual-inner { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; color: #fff; }
+/* 실사진 배너 */
+.about-visual--photo { min-height: 320px; display: flex; align-items: flex-end; padding: 32px; }
+.about-visual-photo { object-fit: cover; z-index: 0; }
+.about-visual-shade { position: absolute; inset: 0; z-index: 1; background: linear-gradient(100deg, rgba(9,20,42,.86) 0%, rgba(9,20,42,.52) 48%, rgba(122,20,32,.34) 100%); }
+.about-visual-inner { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; color: #fff; }
 .av-brand { font-family: "Noto Serif KR", serif; font-weight: 900; font-size: 40px; letter-spacing: -2px; line-height: 1; }
 .av-en { font-size: 12px; font-weight: 700; letter-spacing: 6px; color: rgba(255,255,255,.6); margin-bottom: 8px; }
 .av-tag { font-size: 18px; font-weight: 700; color: rgba(255,255,255,.95); }

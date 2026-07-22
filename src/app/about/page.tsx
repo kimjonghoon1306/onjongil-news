@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "회사소개",
@@ -15,9 +16,17 @@ export default function AboutPage() {
         <p>정치는 뺀다. 사장님·창업자·소상공인에게 진짜 도움 되는 것만 전합니다.</p>
       </div>
 
-      {/* 브랜드 비주얼 */}
-      <div className="about-visual" aria-hidden="true">
-        <div className="about-visual-grid" />
+      {/* 브랜드 비주얼 (실사진 배경) */}
+      <div className="about-visual about-visual--photo">
+        <Image
+          className="about-visual-photo"
+          src="/images/about-hero.webp"
+          alt="아늑한 동네 가게에서 손님을 맞이하며 웃는 사장님"
+          fill
+          priority
+          sizes="(max-width: 900px) 100vw, 860px"
+        />
+        <div className="about-visual-shade" aria-hidden="true" />
         <div className="about-visual-inner">
           <span className="av-brand">온종일뉴스</span>
           <span className="av-en">ONJONGIL NEWS</span>
